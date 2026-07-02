@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Back button smoke</title>
+    <link rel="stylesheet" href="../src/style.css" />
+    <style>
+      #log { font-family: monospace; font-size: 12px; background: #fff; padding: 12px; }
+      .ok { color: #2f8a5f; }
+      .fail { color: #d25260; }
+      #summary { font-size: 20px; font-weight: bold; padding: 10px; }
+    </style>
+  </head>
+  <body>
+    <div id="summary">RUNNING...</div>
+    <div id="log"></div>
+    <div id="app"></div>
+    <script type="module">
+      import { buildQuestionOrder, renderQuestion } from '../src/quiz.js'
+
+      const log = document.getElementById('log')
+      const sum = document.getElementById('summary')
+      const fails = []
+      const line = (msg, ok = true) => {
+        const d = document.createElement('div')
+        d.className = ok ? 'ok' : 'fail'
+        d.textContent = (ok ? '[PASS] ' : '[FAIL] ') + msg
+        log.appendChild(d)
+        if (!ok) fails.push(msg)
+      }
+
+      const state = { idx: 0, answers: {}, order: [] }
+      let backCalls = 0
+
+      async function main() {
+        const q = await fetch('../data/questions.json').then((r) => r.json())
+        state.order = buildQuestionOrder(q)
+
+        // --- Test 1: q1 renders WITHOUT back button (disabled) ---
+        let node = renderQuestion(state.order[0], 0, state.order.length, {
+          onAnswer: () => {},
+          onBack: () => {},
+          currentAnswer: undefined,
+        })
+        const backQ1 = node.querySelector('.back-btn')
+        line(`q1 back button present: ${!!backQ1}`, !!backQ1)
+        line(`q1 back button disabled at index 0`, backQ1?.disabled === true)
+
+        // --- Test 2: q2 renders WITH back button enabled ---
+        node = renderQuestion(state.order[1], 1, state.order.length, {
+          onAnswer: () => {},
+          onBack: () => { backCalls++ },
+          currentAnswer: undefined,
+        })
+        const backQ2 = node.querySelector('.back-btn')
+        line(`q2 back button enabled`, backQ2?.disabled === false)
+
+        // --- Test 3: clicking back button fires onBack ---
+        backQ2.click()
+        line(`onBack fired on click: ${backCalls}`, backCalls === 1)
+
+        // --- Test 4: currentAnswer highlights the correct option ---
+        node = renderQuestion(state.order[0], 0, state.order.length, {
+          onAnswer: () => {},
+          onBack: () => {},
+          currentAnswer: 2, // second option
+        })
+        const opts = node.querySelectorAll('.option-btn')
+        const selectedIdx = [...opts].findIndex((b) => b.classList.contains('option-btn--selected'))
+        line(`selected option has --selected class (should be index 1): ${selectedIdx}`, selectedIdx === 1)
+
+        // --- Test 5: no currentAnswer → no selection ---
+        node = renderQuestion(state.order[0], 0, state.order.length, {
+          onAnswer: () => {},
+          onBack: () => {},
+          currentAnswer: undefined,
+        })
+        const anySelected = [...node.querySelectorAll('.option-btn')].some((b) =>
+          b.classList.contains('option-btn--selected'),
+        )
+        line(`no selection when currentAnswer undefined`, !anySelected)
+
+        // --- Test 6: full flow — answer → back → previous answer preserved ---
+        state.idx = 0
+        state.answers = {}
+        function step() {
+          const q = state.order[state.idx]
+          return renderQuestion(q, state.idx, state.order.length, {
+            onAnswer: (qid, val) => { state.answers[qid] = val; state.idx++ },
+            onBack: () => { state.idx-- },
+            currentAnswer: state.answers[q.id],
+          })
+        }
+        let n1 = step()
+        n1.querySelectorAll('.option-btn')[1].click() // pick option value=2 on q1
+        line(`after answering q1: idx=${state.idx}, answers=${JSON.stringify(state.answers)}`, state.idx === 1)
+
+        let n2 = step()
+        n2.querySelector('.back-btn').click()
+        line(`after back on q2: idx=${state.idx} (should be 0)`, state.idx === 0)
+
+        let n1again = step()
+        const selNow = [...n1again.querySelectorAll('.option-btn')].findIndex((b) =>
+          b.classList.contains('option-btn--selected'),
+        )
+        line(`re-visiting q1: previous choice pre-selected at idx=${selNow}`, selNow === 1)
+
+        sum.className = fails.length ? 'fail' : 'ok'
+        sum.textContent = fails.length ? `FAIL (${fails.length})` : 'ALL BACK-BUTTON PASS'
+      }
+      main().catch((e) => {
+        line('Exception: ' + e.message, false)
+        sum.className = 'fail'
+        sum.textContent = 'CRASHED'
+      })
+    </script>
+  </body>
+</html>

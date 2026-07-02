@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>LBTI Browser Smoke Test</title>
+    <link rel="stylesheet" href="../src/style.css" />
+    <style>
+      #log {
+        font-family: monospace;
+        font-size: 12px;
+        background: #fff;
+        padding: 16px;
+        margin: 8px 0;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        color: #2c1e21;
+      }
+      .ok { color: #2f8a5f; }
+      .fail { color: #d25260; }
+      #summary { font-size: 20px; font-weight: bold; padding: 12px; }
+    </style>
+  </head>
+  <body>
+    <div id="summary">RUNNING...</div>
+    <div id="log"></div>
+    <div id="app"></div>
+    <script type="module">
+      import { calcDimensionScores, scoresToLevels, determineResult } from '../src/engine.js'
+      import { buildQuestionOrder } from '../src/quiz.js'
+
+      const log = document.getElementById('log')
+      const summary = document.getElementById('summary')
+      const fails = []
+
+      function line(msg, ok = true) {
+        const d = document.createElement('div')
+        d.className = ok ? 'ok' : 'fail'
+        d.textContent = (ok ? '[PASS] ' : '[FAIL] ') + msg
+        log.appendChild(d)
+        if (!ok) fails.push(msg)
+      }
+
+      async function loadAll() {
+        const [q, d, t, c] = await Promise.all([
+          fetch('../data/questions.json').then((r) => r.json()),
+          fetch('../data/dimensions.json').then((r) => r.json()),
+          fetch('../data/types.json').then((r) => r.json()),
+          fetch('../data/config.json').then((r) => r.json()),
+        ])
+        return { q, d, t, c }
+      }
+
+      async function main() {
+        try {
+          const { q, d, t, c } = await loadAll()
+          line(`Loaded: ${q.main.length} questions, ${d.order.length} dims, ${t.standard.length} std types`)
+
+          // Test 1: intro → quiz → result flow
+          const order = buildQuestionOrder(q)
+          line(`buildQuestionOrder len = ${order.length}`, order.length === q.main.length + 1)
+
+          // Test 2: all middle
+          const midAns = Object.fromEntries(order.map((qi) => [qi.id, 2]))
+          const s = calcDimensionScores(midAns, q.main)
+          const l = scoresToLevels(s, c.scoring.levelThresholds)
+          const r1 = determineResult(l, d.order, t.standard, t.special, { isEmo: false })
+          line(`all middle → ${r1.primary.cn} (${r1.primary.similarity}%) mode=${r1.mode}`,
+            r1.mode === 'normal' && r1.primary.similarity > 60)
+
+          // Test 3: emo gate
+          const eAns = { ...midAns, [c.emoGate.questionId]: 3 }
+          const isEmo = eAns[c.emoGate.questionId] === c.emoGate.triggerValue
+          const r2 = determineResult(l, d.order, t.standard, t.special, { isEmo })
+          line(`emo gate → ${r2.primary.cn} mode=${r2.mode}`, r2.mode === 'emo')
+
+          // Test 4: fallback
+          const adv = {
+            A1: 'L', A2: 'H', A3: 'L', E1: 'L', E2: 'H', E3: 'H',
+            B1: 'H', B2: 'H', B3: 'H', C1: 'L', C2: 'L', C3: 'L',
+            M1: 'H', M2: 'L', M3: 'H',
+          }
+          const r3 = determineResult(adv, d.order, t.standard, t.special, { isEmo: false })
+          line(`adversarial → ${r3.primary.cn} (${r3.primary.similarity}%) mode=${r3.mode}`,
+            r3.mode === 'fallback')
+
+          // Test 5: rankings length
+          line(`Top-5 rankings count = ${r1.rankings.length}`, r1.rankings.length >= 5)
+
+          // Test 6: render result (invoke result.js)
+          const { renderResult } = await import('../src/result.js')
+          const wrap = renderResult({
+            result: r1,
+            dimensions: d,
+            config: c,
+            standardTypes: t.standard,
+            onRestart: () => {},
+          })
+          const app = document.getElementById('app')
+          app.appendChild(wrap)
+          const hasName = !!wrap.querySelector('.result-name')
+          const hasRadar = !!wrap.querySelector('#radar')
+          const hasCopyBtn = !!wrap.querySelector('#copy-btn')
+          line(`result page: name=${hasName}, radar=${hasRadar}, copy-btn=${hasCopyBtn}`,
+            hasName && hasRadar && hasCopyBtn)
+
+          // Test 7: canvas actually painted (nonzero bytes)
+          const radar = wrap.querySelector('#radar')
+          if (radar) {
+            const ctx = radar.getContext('2d')
+            const px = ctx.getImageData(radar.width / 2, radar.height / 2, 1, 1).data
+            const painted = px[3] > 0 || (px[0] + px[1] + px[2]) > 0
+            line(`canvas painted at center: rgba=[${[...px].join(',')}]`, painted)
+          }
+
+          summary.className = fails.length ? 'fail' : 'ok'
+          summary.textContent = fails.length ? `FAIL (${fails.length})` : 'ALL BROWSER SMOKE PASS'
+        } catch (e) {
+          line('Exception: ' + e.message, false)
+          summary.className = 'fail'
+          summary.textContent = 'CRASHED'
+        }
+      }
+      main()
+    </script>
+  </body>
+</html>
