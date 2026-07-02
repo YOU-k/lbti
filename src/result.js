@@ -37,9 +37,16 @@ export function renderResult({ result, dimensions, config, standardTypes, onRest
     </header>
 
     <section class="result-desc">
-      <p>${escapeHtml(primary.desc)}</p>
+      <p>${renderDescMarkdown(primary.desc)}</p>
       ${primary.slogan ? `<blockquote class="result-slogan">「${escapeHtml(primary.slogan)}」</blockquote>` : ''}
     </section>
+
+    ${primary.warning ? `
+      <section class="result-warning">
+        <div class="warning-label">📢 给 ta 的一句话警告</div>
+        <p class="warning-body">${escapeHtml(primary.warning)}</p>
+      </section>
+    ` : ''}
 
     ${
       mode === 'normal' && (highList.length || lowList.length)
@@ -62,7 +69,7 @@ export function renderResult({ result, dimensions, config, standardTypes, onRest
     }
 
     <section class="result-chart">
-      <h3>你的 15 维恋爱雷达</h3>
+      <h3>你的 10 维恋爱雷达</h3>
       <div class="chart-wrap"><canvas id="radar"></canvas></div>
     </section>
 
@@ -113,6 +120,11 @@ export function renderResult({ result, dimensions, config, standardTypes, onRest
   wrap.querySelector('#restart-btn').addEventListener('click', onRestart)
 
   return wrap
+}
+
+function renderDescMarkdown(text) {
+  // Only supports **bold** for now — used in "拥有一个 XX 朋友是什么体验" hooks
+  return escapeHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
 }
 
 function parsePatternToLevels(pattern, dimOrder) {

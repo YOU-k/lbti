@@ -304,6 +304,28 @@ body {
   color: var(--accent-hover);
   font-weight: 600;
 }
+.result-desc strong {
+  color: var(--accent-hover);
+  font-weight: 700;
+}
+.result-warning {
+  border: 2px dashed var(--accent-soft);
+  background: #fff;
+  padding: 16px 18px !important;
+}
+.warning-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.warning-body {
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 600;
+  line-height: 1.55;
+  margin: 0;
+}
 .result-match h3,
 .result-chart h3,
 .result-top5 h3 {
