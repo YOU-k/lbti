@@ -23,7 +23,12 @@ function loadHtml2Canvas() {
 }
 
 /**
- * Snap a DOM element to PNG blob and trigger download.
+ * Snap a DOM element to a PNG and show it in a modal for long-press save.
+ *
+ * Why not just trigger download? WeChat's in-app browser (X5) blocks
+ * programmatic file downloads. Even on iOS Safari, `<a download>` is
+ * finicky for large images. Modal + 长按保存 is the universally supported
+ * mobile pattern; on desktop we also provide a direct download link.
  */
 export async function saveElementAsImage(element, filename = 'lbti-result.png') {
   const h2c = await loadHtml2Canvas()
@@ -33,16 +38,55 @@ export async function saveElementAsImage(element, filename = 'lbti-result.png') 
     useCORS: true,
     logging: false,
   })
-  const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'))
-  if (!blob) throw new Error('toBlob returned null')
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  const dataUrl = canvas.toDataURL('image/png')
+  showImageModal(dataUrl, filename)
+}
+
+function showImageModal(dataUrl, filename) {
+  const isWechat = /MicroMessenger/i.test(navigator.userAgent)
+  const isMobile = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent)
+  const hint = isWechat
+    ? '👇 长按图片，选择「保存图片」到相册'
+    : isMobile
+    ? '👇 长按图片保存到相册（或用下方按钮下载）'
+    : '👇 右键图片保存，或用下方按钮下载'
+
+  const backdrop = document.createElement('div')
+  backdrop.className = 'img-modal-backdrop'
+  backdrop.innerHTML = `
+    <div class="img-modal">
+      <button class="img-modal-close" type="button" aria-label="关闭">×</button>
+      <p class="img-modal-hint">${hint}</p>
+      <img class="img-modal-img" src="${dataUrl}" alt="LBTI 结果">
+      ${!isWechat ? `<a class="btn btn-primary img-modal-dl" download="${escapeAttr(filename)}" href="${dataUrl}">下载图片</a>` : ''}
+    </div>
+  `
+  document.body.appendChild(backdrop)
+
+  const close = () => backdrop.remove()
+  backdrop.querySelector('.img-modal-close').addEventListener('click', close)
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) close()
+  })
+
+  // Also close on Escape
+  const onKey = (e) => {
+    if (e.key === 'Escape') {
+      close()
+      document.removeEventListener('keydown', onKey)
+    }
+  }
+  document.addEventListener('keydown', onKey)
+}
+
+function escapeAttr(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[c]))
 }
 
 export function buildShareText(result, siteTitle, siteUrl) {

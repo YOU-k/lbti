@@ -145,19 +145,20 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
     const original = saveBtn.textContent
     saveBtn.textContent = '生成中...'
     saveBtn.disabled = true
+    // Hide action buttons + footer during snapshot for a clean card
+    const actions = wrap.querySelector('.result-actions')
+    const footer = wrap.querySelector('.result-footer')
+    actions.style.visibility = 'hidden'
+    if (footer) footer.style.visibility = 'hidden'
     try {
-      // Hide action buttons + footer during snapshot for a clean card
-      const actions = wrap.querySelector('.result-actions')
-      const footer = wrap.querySelector('.result-footer')
-      actions.style.visibility = 'hidden'
-      if (footer) footer.style.visibility = 'hidden'
       await saveElementAsImage(wrap, `LBTI-${primary.cn.replace(/[/\s]/g, '')}.png`)
+      saveBtn.textContent = '✓ 图片已生成'
+    } catch (e) {
+      saveBtn.textContent = '生成失败'
+      console.error(e)
+    } finally {
       actions.style.visibility = ''
       if (footer) footer.style.visibility = ''
-      saveBtn.textContent = '✓ 已保存到相册/下载'
-    } catch (e) {
-      saveBtn.textContent = '生成失败，试试复制文字'
-      console.error(e)
     }
     setTimeout(() => {
       saveBtn.textContent = original
