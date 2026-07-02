@@ -23,14 +23,11 @@ const config = load('../data/config.json')
 function run(name, answers, expectMode) {
   const scores = calcDimensionScores(answers, questions.main)
   const levels = scoresToLevels(scores, config.scoring.levelThresholds)
-  const gateId = config.emoGate.questionId
-  const isEmo = answers[gateId] === config.emoGate.triggerValue
   const result = determineResult(
     levels,
     dimensions.order,
     types.standard,
     types.special,
-    { isEmo },
   )
   const status = expectMode === result.mode ? 'PASS' : 'FAIL'
   console.log(
@@ -40,52 +37,43 @@ function run(name, answers, expectMode) {
 }
 
 const idsMain = questions.main.map((q) => q.id)
-const gateId = 'emo_gate'
-const triggerValue = config.emoGate.triggerValue
 
 let all = true
 
 // 1. All value=1 (extreme L) → normal
 all = run(
   'all=1 (extreme L)',
-  Object.fromEntries([...idsMain.map((id) => [id, 1]), [gateId, 1]]),
+  Object.fromEntries(idsMain.map((id) => [id, 1])),
   'normal',
 ) && all
 
 // 2. All value=4 (extreme H) → normal
 all = run(
   'all=4 (extreme H)',
-  Object.fromEntries([...idsMain.map((id) => [id, 4]), [gateId, 1]]),
+  Object.fromEntries(idsMain.map((id) => [id, 4])),
   'normal',
 ) && all
 
-// 3. All value=2 (lean L) → normal, should be around L
+// 3. All value=2 (lean L) → normal
 all = run(
   'all=2 (lean L)',
-  Object.fromEntries([...idsMain.map((id) => [id, 2]), [gateId, 1]]),
+  Object.fromEntries(idsMain.map((id) => [id, 2])),
   'normal',
 ) && all
 
-// 4. All value=3 (lean H) → normal, should be around H
+// 4. All value=3 (lean H) → normal
 all = run(
   'all=3 (lean H)',
-  Object.fromEntries([...idsMain.map((id) => [id, 3]), [gateId, 1]]),
+  Object.fromEntries(idsMain.map((id) => [id, 3])),
   'normal',
 ) && all
 
-// 5. emo gate = triggerValue → emo mode
-all = run(
-  `emo gate = ${triggerValue}`,
-  Object.fromEntries([...idsMain.map((id) => [id, 2]), [gateId, triggerValue]]),
-  'emo',
-) && all
-
-// 6. Adversarial → fallback (found via brute-force search: max sim 55%)
+// 5. Adversarial → fallback (found via brute-force: max sim 55%)
 const adversarialLevels = {
-  A1: 'L', A2: 'L',
-  E1: 'L', E3: 'L',
+  A1: 'L', A2: 'M',
+  E1: 'L', E3: 'H',
   B1: 'L', B2: 'L',
-  C1: 'L', C2: 'L',
+  C1: 'H', C2: 'L',
   M1: 'H', M3: 'H',
 }
 const perDim = {}
@@ -93,23 +81,22 @@ questions.main.forEach((q) => {
   if (!perDim[q.dim]) perDim[q.dim] = []
   perDim[q.dim].push(q.id)
 })
-// L pattern → value 1 (sum 2), H pattern → value 4 (sum 8), M → mix (1+4)
 const levelToVal = { L: 1, M: 3, H: 4 }
-const adversarialAnswers = { [gateId]: 1 }
+const adversarialAnswers = {}
 for (const [dim, level] of Object.entries(adversarialLevels)) {
   const v = levelToVal[level]
   for (const qid of perDim[dim]) adversarialAnswers[qid] = v
 }
 all = run('adversarial (should trigger fallback)', adversarialAnswers, 'fallback') && all
 
-// 7. Top rankings length
+// 6. Top rankings length
 {
   const scores = calcDimensionScores(
     Object.fromEntries(idsMain.map((id) => [id, 2])),
     questions.main,
   )
   const levels = scoresToLevels(scores, config.scoring.levelThresholds)
-  const result = determineResult(levels, dimensions.order, types.standard, types.special, {})
+  const result = determineResult(levels, dimensions.order, types.standard, types.special)
   if (result.rankings.length >= 5) {
     console.log(`[PASS] Top-5 rankings available: ${result.rankings.length} types`)
   } else {

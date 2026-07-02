@@ -47,7 +47,7 @@ function renderIntro() {
         <span>·</span>
         <span>约 2-3 分钟</span>
         <span>·</span>
-        <span>14 种可能人格</span>
+        <span>17 种可能人格</span>
       </div>
       <p class="intro-anchor">请代入你现在或最近一段稳定关系里的那个人。如果没有，请想象一个交往 4 个月、日常在同城不同居、每周见 2-3 次的人。</p>
       <button class="btn btn-primary btn-lg" id="start-btn">开始测试</button>
@@ -92,13 +92,11 @@ function renderResultView() {
   const { questionsData, dimensions, typesData, config } = state.data
   const scores = calcDimensionScores(state.answers, questionsData.main)
   const levels = scoresToLevels(scores, config.scoring.levelThresholds)
-  const isEmo = state.answers[config.emoGate.questionId] === config.emoGate.triggerValue
   const result = determineResult(
     levels,
     dimensions.order,
     typesData.standard,
     typesData.special,
-    { isEmo },
   )
   const node = renderResult({
     result,

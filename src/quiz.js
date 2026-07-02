@@ -3,8 +3,7 @@
  */
 
 export function buildQuestionOrder(questionsData) {
-  const main = [...questionsData.main]
-  return [...main, { ...questionsData.gate }]
+  return [...questionsData.main]
 }
 
 /**

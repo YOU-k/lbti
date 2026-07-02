@@ -57,31 +57,25 @@
 
           // Test 1: intro → quiz → result flow
           const order = buildQuestionOrder(q)
-          line(`buildQuestionOrder len = ${order.length}`, order.length === q.main.length + 1)
+          line(`buildQuestionOrder len = ${order.length}`, order.length === q.main.length)
 
           // Test 2: all middle
           const midAns = Object.fromEntries(order.map((qi) => [qi.id, 2]))
           const s = calcDimensionScores(midAns, q.main)
           const l = scoresToLevels(s, c.scoring.levelThresholds)
-          const r1 = determineResult(l, d.order, t.standard, t.special, { isEmo: false })
+          const r1 = determineResult(l, d.order, t.standard, t.special)
           line(`all middle → ${r1.primary.cn} (${r1.primary.similarity}%) mode=${r1.mode}`,
             r1.mode === 'normal' && r1.primary.similarity > 60)
 
-          // Test 3: emo gate
-          const eAns = { ...midAns, [c.emoGate.questionId]: c.emoGate.triggerValue }
-          const isEmo = eAns[c.emoGate.questionId] === c.emoGate.triggerValue
-          const r2 = determineResult(l, d.order, t.standard, t.special, { isEmo })
-          line(`emo gate → ${r2.primary.cn} mode=${r2.mode}`, r2.mode === 'emo')
-
-          // Test 4: fallback (found via brute-force: max sim 55%)
+          // Test 3: fallback (found via brute-force: max sim 55%)
           const adv = {
-            A1: 'L', A2: 'L',
-            E1: 'L', E3: 'L',
+            A1: 'L', A2: 'M',
+            E1: 'L', E3: 'H',
             B1: 'L', B2: 'L',
-            C1: 'L', C2: 'L',
+            C1: 'H', C2: 'L',
             M1: 'H', M3: 'H',
           }
-          const r3 = determineResult(adv, d.order, t.standard, t.special, { isEmo: false })
+          const r3 = determineResult(adv, d.order, t.standard, t.special)
           line(`adversarial → ${r3.primary.cn} (${r3.primary.similarity}%) mode=${r3.mode}`,
             r3.mode === 'fallback')
 

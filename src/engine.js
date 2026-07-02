@@ -62,7 +62,7 @@ export function matchType(userLevels, dimOrder, pattern) {
 /**
  * 匹配所有类型，排序，应用特殊覆盖
  */
-export function determineResult(userLevels, dimOrder, standardTypes, specialTypes, options = {}) {
+export function determineResult(userLevels, dimOrder, standardTypes, specialTypes) {
   const rankings = standardTypes.map((type) => ({
     ...type,
     ...matchType(userLevels, dimOrder, type.pattern),
@@ -71,18 +71,7 @@ export function determineResult(userLevels, dimOrder, standardTypes, specialType
   rankings.sort((a, b) => a.distance - b.distance || b.exact - a.exact || b.similarity - a.similarity)
 
   const best = rankings[0]
-  const drunk = specialTypes.find((t) => t.code === 'EMO')
   const fallback = specialTypes.find((t) => t.code === 'SCHRODINGER')
-
-  // "emo 深夜"覆盖
-  if (options.isEmo && drunk) {
-    return {
-      primary: { ...drunk, similarity: best.similarity, exact: best.exact },
-      secondary: best,
-      rankings,
-      mode: 'emo',
-    }
-  }
 
   // "薛定谔的暧昧"兜底
   if (best.similarity < 60 && fallback) {
