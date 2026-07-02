@@ -13,7 +13,7 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
   // For fallback/emo the primary's pattern isn't meaningful — use rankings[0]
   const anchorPattern = (mode === 'normal' ? primary : rankings[0]).pattern
   const anchorChars = anchorPattern.replace(/-/g, '').split('')
-  const whyDims = pickDecisiveDims(userLevels || {}, anchorChars, dimensions)
+  const whyDims = pickDecisiveDims(userLevels || {}, anchorChars, dimensions, standardTypes)
 
   const modeLabel = mode === 'emo'
     ? '（emo 深夜专属结果）'
@@ -172,28 +172,53 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
 }
 
 /**
- * Pick the 3 dimensions where the user's level matches the type's pattern
- * AND the value is at an extreme (H or L) — those are the "identity signals".
- * Falls back to include M matches if fewer than 3 extreme matches exist.
+ * Pick the 3 dimensions where the user's level (a) matches this type's
+ * pattern AND (b) is most distinctive — few other types share this
+ * level at this dim. That's what actually SEPARATES this type from
+ * neighbors, not just "the value the user happened to score".
+ *
+ * If ties, extremes (H/L) win over M since M often lands mid-range.
  */
-function pickDecisiveDims(userLevels, typeChars, dimensions) {
-  const extremeMatches = []
-  const midMatches = []
-  for (let i = 0; i < dimensions.order.length; i++) {
-    const dim = dimensions.order[i]
+function pickDecisiveDims(userLevels, typeChars, dimensions, allTypes) {
+  const order = dimensions.order
+  // For each dim + level (L/M/H), how many standard types share it?
+  const scoredMatches = []
+  for (let i = 0; i < order.length; i++) {
+    const dim = order[i]
     const userLevel = userLevels[dim]
     const typeLevel = typeChars[i]
     if (!userLevel || userLevel !== typeLevel) continue
+
+    // Count how many other standard types also carry this level at this position.
+    let shared = 0
+    for (const other of allTypes) {
+      const otherChars = other.pattern.replace(/-/g, '')
+      if (otherChars[i] === userLevel) shared++
+    }
+
     const def = dimensions.dims[dim]
     if (!def) continue
-    const hint = userLevel === 'H' ? def.hi : userLevel === 'L' ? def.lo : '中等，介于两端之间'
-    const entry = { dim, level: userLevel, name: def.name, hint }
-    if (userLevel === 'M') midMatches.push(entry)
-    else extremeMatches.push(entry)
+    const hint =
+      userLevel === 'H' ? def.hi : userLevel === 'L' ? def.lo : '介于两端之间'
+    scoredMatches.push({
+      dim,
+      level: userLevel,
+      name: def.name,
+      hint,
+      shared, // fewer = more distinctive
+    })
   }
-  const picks = extremeMatches.slice(0, 3)
-  while (picks.length < 3 && midMatches.length > 0) picks.push(midMatches.shift())
-  return picks
+
+  // Sort: fewer shared → more distinctive first;
+  //       if tied, prefer extremes (H/L) over M.
+  scoredMatches.sort((a, b) => {
+    if (a.shared !== b.shared) return a.shared - b.shared
+    const aMid = a.level === 'M' ? 1 : 0
+    const bMid = b.level === 'M' ? 1 : 0
+    return aMid - bMid
+  })
+
+  return scoredMatches.slice(0, 3)
 }
 
 function renderDescMarkdown(text) {
