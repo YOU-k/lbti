@@ -68,7 +68,7 @@
 | SOLO | 独处王/女王型 | `LHM-LMM-HLL-MHM-MLL` |
 | WEDDING | 结婚脑型 | `MLH-HMH-LMH-LHH-MHH` |
 | FEARW | 恐婚型 | `LHM-MML-HLM-MMM-MML` |
-| CLEAR | 人间清醒型 | `LMM-MMM-HMM-LHM-MMM` |
+| CLEAR | 人间清醒型 | `LMH-MMM-HLM-LHM-LMM` |
 | BOOM | 原地爆炸型 | `HLM-HHM-MHH-HML-HHM` |
 
 ### 2 特殊型
