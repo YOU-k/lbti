@@ -40,7 +40,7 @@ function renderIntro() {
         <span>·</span>
         <span>约 3-5 分钟</span>
         <span>·</span>
-        <span>27 种可能人格</span>
+        <span>14 种可能人格</span>
       </div>
       <button class="btn btn-primary btn-lg" id="start-btn">开始测试</button>
       <p class="intro-author">${escapeHtml(config.display.author)}</p>

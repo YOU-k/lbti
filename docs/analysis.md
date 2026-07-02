@@ -52,9 +52,9 @@
 | M2 | 陪伴需求 | 24 小时都要 | 一个人也行 |
 | M3 | 长期规划 | 第一次约会就想到结婚 | 谈以后就想逃 |
 
-## 27 型速查
+## 14 型速查
 
-### 25 标准型
+### 12 标准型
 
 | 代码 | 名字 | Pattern (A1-A3 · E1-E3 · B1-B3 · C1-C3 · M1-M3) |
 |---|---|---|
@@ -62,27 +62,14 @@
 | LOVEBRAIN | 恋爱脑型 | `HLM-HHH-LMH-MHH-HHH` |
 | SEAKING | 海王/海后型 | `LHL-HLM-HLL-MML-HLL` |
 | WHITEMOON | 白月光型 | `LHH-LLM-HLL-LLL-LLL` |
-| BACKUP | 备胎候鸟型 | `HLH-LLL-LLH-LHL-LHL` |
-| COOL | 清冷主义型 | `LMH-LLL-HLM-MMM-LLL` |
-| CP | CP 狂魔型 | `MLH-HHH-LHH-LMM-HHM` |
 | COLDWAR | 冷战大师型 | `MHL-LLL-HMM-HLL-MML` |
-| RENGE | 报复性单身型 | `LHL-LLL-HLL-HLL-MLL` |
-| MODEL | 模范情侣型 | `LLH-MMH-MMM-LHH-MMH` |
-| WORK | 事业型 | `LMM-MLL-HLL-MMM-LLM` |
-| CTRL | 控制欲爆棚型 | `MLL-HMM-LHH-MML-MHH` |
-| VAMPIRE | 情绪吸血鬼型 | `HLL-MHM-LHH-MHL-MHM` |
+| CTRL | 控制狂型 | `MLL-HMM-LHH-MML-MHH` |
 | ANALYST | 精神分析师型 | `MMM-MLL-HLM-MHM-LMM` |
-| CONTRACT | 契约恋人型 | `LMM-MLM-HLM-LHM-LMH` |
-| INTENSE | 强度选手型 | `HLM-HHH-LHH-HMM-HHM` |
-| SAINT | AA 制圣人型 | `LMH-MLL-HLM-LHM-LMM` |
+| SOLO | 独处王/女王型 | `LHM-LMM-HLL-MHM-MLL` |
 | WEDDING | 结婚脑型 | `MLH-HMH-LMH-LHH-MHH` |
 | FEARW | 恐婚型 | `LHM-MML-HLM-MMM-MML` |
-| BOOM | 原地爆炸型 | `HLM-HHM-MHH-HML-HHM` |
-| SOLO | 独处王/女王型 | `LHM-LMM-HLL-MHM-MLL` |
-| JIEDOG | 姐狗/哥狗型 | `MLH-HHM-LMH-LHH-HHM` |
-| BIG | 大哥/大姐型 | `LMH-HMM-MHM-LHM-MMH` |
-| LOOP | 复读机型 | `MLM-MHM-LMH-LHL-MHM` |
 | CLEAR | 人间清醒型 | `LMM-MMM-HMM-LHM-MMM` |
+| BOOM | 原地爆炸型 | `HLM-HHM-MHH-HML-HHM` |
 
 ### 2 特殊型
 
@@ -96,13 +83,13 @@
 跑 `npm run check-patterns` 得到（当前值）：
 
 ```
-Pairs: 300
-Mean distance: 12.94  (target >= 6)
-Min: 3                (should be >= 3)
+Pairs: 66
+Mean distance: 13.45  (target >= 6)
+Min: 4                (should be >= 3)
 Max: 26
 ```
 
-任意两型间的曼哈顿距离均 ≥ 3，确保用户命中不会挤在同一型。
+任意两型间的曼哈顿距离均 ≥ 4，确保用户命中不会挤在同一型。
 
 ## 天菜 & 毒药机制
 
