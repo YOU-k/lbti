@@ -5,6 +5,8 @@ import './style.css'
 import { calcDimensionScores, scoresToLevels, determineResult } from './engine.js'
 import { buildQuestionOrder, renderQuestion } from './quiz.js'
 import { renderResult } from './result.js'
+import { parseSharedFromLocation } from './share.js'
+import { renderSharedCard } from './shared.js'
 
 import questionsData from '../data/questions.json'
 import dimensions from '../data/dimensions.json'
@@ -13,18 +15,38 @@ import config from '../data/config.json'
 
 const app = document.getElementById('app')
 
+const shared = parseSharedFromLocation()
+
 const state = {
-  view: 'intro',
+  view: shared ? 'shared' : 'intro',
   answers: {},
   currentIdx: 0,
   order: buildQuestionOrder(questionsData),
+  shared,
 }
 
 function render() {
   app.innerHTML = ''
-  if (state.view === 'intro') renderIntro()
+  if (state.view === 'shared') renderSharedView()
+  else if (state.view === 'intro') renderIntro()
   else if (state.view === 'quiz') renderQuiz()
   else if (state.view === 'result') renderResultView()
+}
+
+function renderSharedView() {
+  const allTypes = [...typesData.standard, ...typesData.special]
+  const node = renderSharedCard({
+    shared: state.shared,
+    allTypes,
+    onStartMine: () => {
+      state.view = 'intro'
+      state.shared = null
+      // Clean URL so the shared payload doesn't come back on refresh
+      history.replaceState(null, '', window.location.pathname)
+      render()
+    },
+  })
+  app.appendChild(node)
 }
 
 function renderIntro() {

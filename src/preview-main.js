@@ -5,6 +5,8 @@
 import { calcDimensionScores, scoresToLevels, determineResult } from './engine.js'
 import { buildQuestionOrder, renderQuestion } from './quiz.js'
 import { renderResult } from './result.js'
+import { parseSharedFromLocation } from './share.js'
+import { renderSharedCard } from './shared.js'
 
 const app = document.getElementById('app')
 
@@ -18,19 +20,39 @@ async function loadAll() {
   return { questionsData, dimensions, typesData, config }
 }
 
+const shared = parseSharedFromLocation()
+
 const state = {
-  view: 'intro',
+  view: shared ? 'shared' : 'intro',
   answers: {},
   currentIdx: 0,
   order: [],
   data: null,
+  shared,
 }
 
 function render() {
   app.innerHTML = ''
-  if (state.view === 'intro') renderIntro()
+  if (state.view === 'shared') renderSharedView()
+  else if (state.view === 'intro') renderIntro()
   else if (state.view === 'quiz') renderQuiz()
   else if (state.view === 'result') renderResultView()
+}
+
+function renderSharedView() {
+  const { typesData } = state.data
+  const allTypes = [...typesData.standard, ...typesData.special]
+  const node = renderSharedCard({
+    shared: state.shared,
+    allTypes,
+    onStartMine: () => {
+      state.view = 'intro'
+      state.shared = null
+      history.replaceState(null, '', window.location.pathname)
+      render()
+    },
+  })
+  app.appendChild(node)
 }
 
 function renderIntro() {

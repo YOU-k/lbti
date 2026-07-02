@@ -50,13 +50,37 @@ export function buildShareText(result, siteTitle, siteUrl) {
   const secondaryLine = secondary && result.mode === 'normal'
     ? `\n次匹配：${secondary.cn}（${secondary.similarity}%）`
     : ''
+  // Encode primary result into URL so viewer sees the sharer's result card
+  const sharedUrl = buildSharedUrl(siteUrl, primary.code, primary.similarity)
   return [
     `【${siteTitle}】`,
     `我是「${primary.cn}」${primary.slogan ? '—— ' + primary.slogan : ''}`,
     `匹配度：${primary.similarity}%${secondaryLine}`,
     ``,
-    `📎 来测你的：${siteUrl}`,
+    `📎 看我的结果卡 + 测你的：${sharedUrl}`,
   ].join('\n')
+}
+
+/**
+ * Build a URL that pre-loads a shared result card.
+ * Format: <baseUrl>?r=<code>&s=<similarity>
+ */
+export function buildSharedUrl(baseUrl, code, similarity) {
+  const url = new URL(baseUrl)
+  url.searchParams.set('r', code)
+  url.searchParams.set('s', String(similarity))
+  return url.toString()
+}
+
+/**
+ * Parse the current URL for a shared-result payload. Returns null if none.
+ */
+export function parseSharedFromLocation() {
+  const params = new URLSearchParams(window.location.search)
+  const code = params.get('r')
+  if (!code) return null
+  const s = parseInt(params.get('s') || '0', 10)
+  return { code, similarity: Number.isFinite(s) ? s : 0 }
 }
 
 export async function copyToClipboard(text) {

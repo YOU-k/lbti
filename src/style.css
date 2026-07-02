@@ -326,6 +326,95 @@ body {
   line-height: 1.55;
   margin: 0;
 }
+/* ============ Shared landing (friend's URL) ============ */
+.shared-page {
+  display: flex;
+  align-items: center;
+  min-height: calc(100vh - 72px);
+}
+.shared-inner {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  width: 100%;
+}
+.shared-badge {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.shared-name {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.shared-intro {
+  font-size: 14px;
+  color: var(--text-soft);
+  font-style: italic;
+  margin-bottom: 12px;
+}
+.shared-sim {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+.shared-sim b {
+  color: var(--accent);
+  font-size: 15px;
+}
+.shared-slogan {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-left: 3px solid var(--accent-soft);
+  background: var(--accent-bg);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--accent-hover);
+  font-weight: 600;
+  text-align: left;
+}
+.shared-warning {
+  border: 2px dashed var(--accent-soft);
+  padding: 14px 16px;
+  border-radius: 6px;
+  margin: 16px 0 24px;
+  text-align: left;
+}
+.shared-warning-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.shared-warning-body {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 600;
+  line-height: 1.55;
+  margin: 0;
+}
+.shared-cta-lead {
+  font-size: 14px;
+  color: var(--text-soft);
+  margin: 16px 0 12px;
+}
+.shared-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 12px;
+}
+.shared-error {
+  font-size: 14px;
+  color: var(--text-soft);
+  margin-bottom: 20px;
+}
+
 .result-why h3 {
   font-size: 15px;
   color: var(--accent-hover);
