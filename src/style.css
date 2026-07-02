@@ -89,6 +89,16 @@ body {
   font-size: 12px;
   color: var(--text-dim);
 }
+.intro-anchor {
+  margin: 20px 0 24px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--accent-bg);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  line-height: 1.65;
+  text-align: left;
+}
 .intro-warning {
   margin-top: 12px;
   font-size: 11px;
