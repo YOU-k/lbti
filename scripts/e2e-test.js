@@ -41,38 +41,46 @@ function run(name, answers, expectMode) {
 
 const idsMain = questions.main.map((q) => q.id)
 const gateId = 'emo_gate'
+const triggerValue = config.emoGate.triggerValue
 
 let all = true
 
-// 1. All middle → normal, should be > 60%
+// 1. All value=1 (extreme L) → normal
 all = run(
-  'all middle (2)',
-  Object.fromEntries([...idsMain.map((id) => [id, 2]), [gateId, 1]]),
-  'normal',
-) && all
-
-// 2. All high (3) → normal
-all = run(
-  'all high (3), emo=1',
-  Object.fromEntries([...idsMain.map((id) => [id, 3]), [gateId, 1]]),
-  'normal',
-) && all
-
-// 3. All low (1) → normal
-all = run(
-  'all low (1), emo=1',
+  'all=1 (extreme L)',
   Object.fromEntries([...idsMain.map((id) => [id, 1]), [gateId, 1]]),
   'normal',
 ) && all
 
-// 4. gate = 3 → emo (regardless of other answers)
+// 2. All value=4 (extreme H) → normal
 all = run(
-  'emo gate = 3',
-  Object.fromEntries([...idsMain.map((id) => [id, 2]), [gateId, 3]]),
+  'all=4 (extreme H)',
+  Object.fromEntries([...idsMain.map((id) => [id, 4]), [gateId, 1]]),
+  'normal',
+) && all
+
+// 3. All value=2 (lean L) → normal, should be around L
+all = run(
+  'all=2 (lean L)',
+  Object.fromEntries([...idsMain.map((id) => [id, 2]), [gateId, 1]]),
+  'normal',
+) && all
+
+// 4. All value=3 (lean H) → normal, should be around H
+all = run(
+  'all=3 (lean H)',
+  Object.fromEntries([...idsMain.map((id) => [id, 3]), [gateId, 1]]),
+  'normal',
+) && all
+
+// 5. emo gate = triggerValue → emo mode
+all = run(
+  `emo gate = ${triggerValue}`,
+  Object.fromEntries([...idsMain.map((id) => [id, 2]), [gateId, triggerValue]]),
   'emo',
 ) && all
 
-// 5. Adversarial (seed=128 python discovery) → fallback
+// 6. Adversarial → fallback
 const adversarialLevels = {
   A1: 'L', A2: 'H', A3: 'L',
   E1: 'L', E2: 'H', E3: 'H',
@@ -80,13 +88,13 @@ const adversarialLevels = {
   C1: 'L', C2: 'L', C3: 'L',
   M1: 'H', M2: 'L', M3: 'H',
 }
-// Build answers that produce these exact levels
 const perDim = {}
 questions.main.forEach((q) => {
   if (!perDim[q.dim]) perDim[q.dim] = []
   perDim[q.dim].push(q.id)
 })
-const levelToVal = { L: 1, M: 2, H: 3 }
+// L pattern → value 1 (sum 2), H pattern → value 4 (sum 8), M → mix (1+4)
+const levelToVal = { L: 1, M: 3, H: 4 }
 const adversarialAnswers = { [gateId]: 1 }
 for (const [dim, level] of Object.entries(adversarialLevels)) {
   const v = levelToVal[level]
@@ -94,7 +102,7 @@ for (const [dim, level] of Object.entries(adversarialLevels)) {
 }
 all = run('adversarial (should trigger fallback)', adversarialAnswers, 'fallback') && all
 
-// 6. Also assert Top-5 rendering: rankings length >= 5
+// 7. Top rankings length
 {
   const scores = calcDimensionScores(
     Object.fromEntries(idsMain.map((id) => [id, 2])),

@@ -68,7 +68,7 @@
             r1.mode === 'normal' && r1.primary.similarity > 60)
 
           // Test 3: emo gate
-          const eAns = { ...midAns, [c.emoGate.questionId]: 3 }
+          const eAns = { ...midAns, [c.emoGate.questionId]: c.emoGate.triggerValue }
           const isEmo = eAns[c.emoGate.questionId] === c.emoGate.triggerValue
           const r2 = determineResult(l, d.order, t.standard, t.special, { isEmo })
           line(`emo gate → ${r2.primary.cn} mode=${r2.mode}`, r2.mode === 'emo')

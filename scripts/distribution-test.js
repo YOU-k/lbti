@@ -76,9 +76,9 @@ function report(name, probs) {
 console.log('LBTI Distribution Test — 1000 simulated users per profile')
 console.log('=========================================================')
 
-const uniform = report('Uniform random', [0.33, 0.34, 0.33])
-const biased = report('Middle-biased (SDR)', [0.15, 0.70, 0.15])
-const slight = report('Slightly middle-biased', [0.25, 0.50, 0.25])
+const uniform = report('Uniform random', [0.25, 0.25, 0.25, 0.25])
+const biased = report('Middle-biased (SDR)', [0.10, 0.40, 0.40, 0.10])
+const slight = report('Slightly middle-biased', [0.15, 0.35, 0.35, 0.15])
 
 console.log('\n=== Verdict ===')
 if (biased.top1pct < 55) {
