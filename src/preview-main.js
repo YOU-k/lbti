@@ -103,6 +103,7 @@ function renderResultView() {
     dimensions,
     config,
     standardTypes: typesData.standard,
+    userLevels: levels,
     onRestart: () => {
       state.view = 'intro'
       render()

@@ -326,6 +326,58 @@ body {
   line-height: 1.55;
   margin: 0;
 }
+.result-why h3 {
+  font-size: 15px;
+  color: var(--accent-hover);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.why-lead {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin-bottom: 12px;
+}
+.why-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.why-list li {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+.why-dim {
+  color: var(--accent-hover);
+  font-weight: 700;
+  font-size: 13px;
+}
+.why-level {
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+.why-level-h {
+  background: var(--accent);
+}
+.why-level-l {
+  background: #7ba58a;
+}
+.why-level-m {
+  background: var(--text-dim);
+}
+.why-hint {
+  color: var(--text-soft);
+  line-height: 1.5;
+}
 .result-match h3,
 .result-chart h3,
 .result-top5 h3 {

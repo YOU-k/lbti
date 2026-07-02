@@ -2,13 +2,18 @@
  * 结果页渲染
  */
 import { drawRadar } from './chart.js'
-import { buildShareText, copyToClipboard } from './share.js'
+import { buildShareText, copyToClipboard, saveElementAsImage } from './share.js'
 
-export function renderResult({ result, dimensions, config, standardTypes, onRestart }) {
+export function renderResult({ result, dimensions, config, standardTypes, userLevels, onRestart }) {
   const { primary, secondary, rankings, mode } = result
 
   const wrap = document.createElement('div')
   wrap.className = 'result-page'
+
+  // For fallback/emo the primary's pattern isn't meaningful — use rankings[0]
+  const anchorPattern = (mode === 'normal' ? primary : rankings[0]).pattern
+  const anchorChars = anchorPattern.replace(/-/g, '').split('')
+  const whyDims = pickDecisiveDims(userLevels || {}, anchorChars, dimensions)
 
   const modeLabel = mode === 'emo'
     ? '（emo 深夜专属结果）'
@@ -45,6 +50,22 @@ export function renderResult({ result, dimensions, config, standardTypes, onRest
       <section class="result-warning">
         <div class="warning-label">📢 给 ta 的一句话警告</div>
         <p class="warning-body">${escapeHtml(primary.warning)}</p>
+      </section>
+    ` : ''}
+
+    ${whyDims.length > 0 ? `
+      <section class="result-why">
+        <h3>为什么是这个型？</h3>
+        <p class="why-lead">决定你身份的 ${whyDims.length} 个关键维度：</p>
+        <ul class="why-list">
+          ${whyDims.map((d) => `
+            <li>
+              <span class="why-dim">${escapeHtml(d.name)}</span>
+              <span class="why-level why-level-${d.level.toLowerCase()}">${d.level}</span>
+              <span class="why-hint">${escapeHtml(d.hint)}</span>
+            </li>
+          `).join('')}
+        </ul>
       </section>
     ` : ''}
 
@@ -91,7 +112,8 @@ export function renderResult({ result, dimensions, config, standardTypes, onRest
     </section>
 
     <section class="result-actions">
-      <button class="btn btn-primary" id="copy-btn">复制结果给朋友炫耀</button>
+      <button class="btn btn-primary" id="save-img-btn">💾 保存为图片</button>
+      <button class="btn btn-ghost" id="copy-btn">复制结果文字</button>
       <button class="btn btn-ghost" id="restart-btn">再测一次</button>
     </section>
 
@@ -117,9 +139,60 @@ export function renderResult({ result, dimensions, config, standardTypes, onRest
     setTimeout(() => (btn.textContent = '复制结果给朋友炫耀'), 3000)
   })
 
+  // Save-as-image
+  const saveBtn = wrap.querySelector('#save-img-btn')
+  saveBtn.addEventListener('click', async () => {
+    const original = saveBtn.textContent
+    saveBtn.textContent = '生成中...'
+    saveBtn.disabled = true
+    try {
+      // Hide action buttons + footer during snapshot for a clean card
+      const actions = wrap.querySelector('.result-actions')
+      const footer = wrap.querySelector('.result-footer')
+      actions.style.visibility = 'hidden'
+      if (footer) footer.style.visibility = 'hidden'
+      await saveElementAsImage(wrap, `LBTI-${primary.cn.replace(/[/\s]/g, '')}.png`)
+      actions.style.visibility = ''
+      if (footer) footer.style.visibility = ''
+      saveBtn.textContent = '✓ 已保存到相册/下载'
+    } catch (e) {
+      saveBtn.textContent = '生成失败，试试复制文字'
+      console.error(e)
+    }
+    setTimeout(() => {
+      saveBtn.textContent = original
+      saveBtn.disabled = false
+    }, 3000)
+  })
+
   wrap.querySelector('#restart-btn').addEventListener('click', onRestart)
 
   return wrap
+}
+
+/**
+ * Pick the 3 dimensions where the user's level matches the type's pattern
+ * AND the value is at an extreme (H or L) — those are the "identity signals".
+ * Falls back to include M matches if fewer than 3 extreme matches exist.
+ */
+function pickDecisiveDims(userLevels, typeChars, dimensions) {
+  const extremeMatches = []
+  const midMatches = []
+  for (let i = 0; i < dimensions.order.length; i++) {
+    const dim = dimensions.order[i]
+    const userLevel = userLevels[dim]
+    const typeLevel = typeChars[i]
+    if (!userLevel || userLevel !== typeLevel) continue
+    const def = dimensions.dims[dim]
+    if (!def) continue
+    const hint = userLevel === 'H' ? def.hi : userLevel === 'L' ? def.lo : '中等，介于两端之间'
+    const entry = { dim, level: userLevel, name: def.name, hint }
+    if (userLevel === 'M') midMatches.push(entry)
+    else extremeMatches.push(entry)
+  }
+  const picks = extremeMatches.slice(0, 3)
+  while (picks.length < 3 && midMatches.length > 0) picks.push(midMatches.shift())
+  return picks
 }
 
 function renderDescMarkdown(text) {
