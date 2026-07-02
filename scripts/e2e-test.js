@@ -70,11 +70,11 @@ all = run(
 
 // 5. Adversarial → fallback (found via brute-force: max sim 55%)
 const adversarialLevels = {
-  A1: 'L', A2: 'M',
+  A1: 'L', A2: 'L',
   E1: 'L', E3: 'H',
-  B1: 'L', B2: 'L',
+  B1: 'H', B2: 'H',
   C1: 'H', C2: 'L',
-  M1: 'H', M3: 'H',
+  M1: 'L', M3: 'H',
 }
 const perDim = {}
 questions.main.forEach((q) => {
