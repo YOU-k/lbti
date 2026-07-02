@@ -64,7 +64,6 @@ function renderIntro() {
         <span>·</span>
         <span>17 种可能人格</span>
       </div>
-      <p class="intro-anchor">代入你现在或最近一段稳定关系里的 ta。没有就想象一个交往 4 个月的人。<br><br><b>凭直觉选最像你的，不用想太多。</b></p>
       <button class="btn btn-primary btn-lg" id="start-btn">开始测试</button>
       <p class="intro-author">${escapeHtml(config.display.author)}</p>
       <p class="intro-warning">${escapeHtml(config.display.funNote)}</p>
