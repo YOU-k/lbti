@@ -53,7 +53,9 @@ export function matchType(userLevels, dimOrder, pattern) {
     if (diff === 0) exact++
   }
 
-  const similarity = Math.max(0, Math.round((1 - distance / 30) * 100))
+  // Max possible distance = dimOrder.length * 2 (L→H per dim)
+  const maxDistance = dimOrder.length * 2
+  const similarity = Math.max(0, Math.round((1 - distance / maxDistance) * 100))
   return { distance, exact, similarity }
 }
 

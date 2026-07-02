@@ -73,11 +73,13 @@
           const r2 = determineResult(l, d.order, t.standard, t.special, { isEmo })
           line(`emo gate → ${r2.primary.cn} mode=${r2.mode}`, r2.mode === 'emo')
 
-          // Test 4: fallback
+          // Test 4: fallback (found via brute-force: max sim 55%)
           const adv = {
-            A1: 'L', A2: 'H', A3: 'L', E1: 'L', E2: 'H', E3: 'H',
-            B1: 'H', B2: 'H', B3: 'H', C1: 'L', C2: 'L', C3: 'L',
-            M1: 'H', M2: 'L', M3: 'H',
+            A1: 'L', A2: 'L',
+            E1: 'L', E3: 'L',
+            B1: 'L', B2: 'L',
+            C1: 'L', C2: 'L',
+            M1: 'H', M3: 'H',
           }
           const r3 = determineResult(adv, d.order, t.standard, t.special, { isEmo: false })
           line(`adversarial → ${r3.primary.cn} (${r3.primary.similarity}%) mode=${r3.mode}`,

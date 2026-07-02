@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 /**
- * 检查 25 型 pattern 的分布：
+ * 检查所有型 pattern 的分布：
  *   - 两两曼哈顿距离
  *   - 均值 / 最小 / 最大
  *   - 标记距离过近（< MIN_DIST）的成对类型
  *
+ * Thresholds auto-scale with dim count (max distance = dims * 2).
+ *
  * Usage: node scripts/check-patterns.js
  */
 import { readFileSync } from 'node:fs'
-
-const MIN_DIST = 3       // 任意两型之间距离下限
-const MEAN_TARGET = 6    // 均值目标
 
 const LEVEL_NUM = { L: 1, M: 2, H: 3 }
 
@@ -27,6 +26,11 @@ function manhattan(a, b) {
 const types = JSON.parse(readFileSync(new URL('../data/types.json', import.meta.url))).standard
 
 const vecs = types.map((t) => ({ code: t.code, vec: toVec(t.pattern) }))
+
+const dimCount = vecs[0].vec.length
+const maxDistance = dimCount * 2
+const MIN_DIST = Math.max(2, Math.floor(dimCount * 0.2))
+const MEAN_TARGET = Math.floor(dimCount * 0.4)
 
 let sum = 0
 let count = 0
@@ -46,10 +50,11 @@ for (let i = 0; i < vecs.length; i++) {
 }
 
 const mean = (sum / count).toFixed(2)
+console.log(`Dimensions: ${dimCount}  (max distance = ${maxDistance})`)
 console.log(`Pairs: ${count}`)
 console.log(`Mean distance: ${mean} (target >= ${MEAN_TARGET})`)
 console.log(`Min: ${min}  (should be >= ${MIN_DIST})`)
-console.log(`Max: ${max}  (theoretical max: 30)`)
+console.log(`Max: ${max}  (theoretical max: ${maxDistance})`)
 
 if (closePairs.length > 0) {
   console.log('\nToo-close pairs:')
@@ -57,16 +62,6 @@ if (closePairs.length > 0) {
 } else {
   console.log('\nNo overly close pairs.')
 }
-
-// 也报告"太远"（其实无坏处，但可以给一个观感）
-const farPairs = []
-for (let i = 0; i < vecs.length; i++) {
-  for (let j = i + 1; j < vecs.length; j++) {
-    const d = manhattan(vecs[i].vec, vecs[j].vec)
-    if (d >= 20) farPairs.push([vecs[i].code, vecs[j].code, d])
-  }
-}
-console.log(`\nVery far pairs (>=20): ${farPairs.length}`)
 
 const pass = mean >= MEAN_TARGET && min >= MIN_DIST
 console.log(`\n${pass ? 'PASS' : 'FAIL'}`)

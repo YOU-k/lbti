@@ -80,13 +80,13 @@ all = run(
   'emo',
 ) && all
 
-// 6. Adversarial → fallback
+// 6. Adversarial → fallback (found via brute-force search: max sim 55%)
 const adversarialLevels = {
-  A1: 'L', A2: 'H', A3: 'L',
-  E1: 'L', E2: 'H', E3: 'H',
-  B1: 'H', B2: 'H', B3: 'H',
-  C1: 'L', C2: 'L', C3: 'L',
-  M1: 'H', M2: 'L', M3: 'H',
+  A1: 'L', A2: 'L',
+  E1: 'L', E3: 'L',
+  B1: 'L', B2: 'L',
+  C1: 'L', C2: 'L',
+  M1: 'H', M3: 'H',
 }
 const perDim = {}
 questions.main.forEach((q) => {

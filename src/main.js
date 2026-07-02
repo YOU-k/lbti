@@ -38,7 +38,7 @@ function renderIntro() {
       <div class="intro-meta">
         <span>共 ${state.order.length} 题</span>
         <span>·</span>
-        <span>约 3-5 分钟</span>
+        <span>约 2-3 分钟</span>
         <span>·</span>
         <span>14 种可能人格</span>
       </div>
