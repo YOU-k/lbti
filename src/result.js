@@ -21,6 +21,16 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
     ? '（薛定谔的暧昧兜底）'
     : ''
 
+  // Detect hybrid: top-1 and top-2 within 5% → user sits between two types
+  const isHybrid =
+    mode === 'normal' &&
+    secondary &&
+    primary.similarity - secondary.similarity <= 5 &&
+    primary.similarity - secondary.similarity >= 0
+  const hybridBadge = isHybrid
+    ? `<div class="result-hybrid-badge">🎭 你在两个型之间 · ${escapeHtml(primary.cn)} × ${escapeHtml(secondary.cn)}</div>`
+    : ''
+
   const codeMap = Object.fromEntries(standardTypes.map((t) => [t.code, t]))
   const highList = (primary.match_high || []).map((c) => codeMap[c]?.cn).filter(Boolean)
   const lowList = (primary.match_low || []).map((c) => codeMap[c]?.cn).filter(Boolean)
@@ -30,15 +40,19 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
   wrap.innerHTML = `
     <header class="result-header">
       <div class="result-mode">${modeLabel}</div>
+      ${hybridBadge}
       <h1 class="result-name">${escapeHtml(primary.cn)}</h1>
       <p class="result-intro">${escapeHtml(primary.intro)}</p>
       <div class="result-similarity">
-        与原型匹配度 <b>${primary.similarity}%</b>${
+        与原型相似度 <b>${primary.similarity}%</b>${
           secondary && mode === 'normal'
             ? ` · 次匹配 <b>${escapeHtml(secondary.cn)}</b> ${secondary.similarity}%`
             : ''
         }
       </div>
+      ${isHybrid ? `
+        <p class="result-hybrid-note">你的答题分布让两个型跟你距离很近 —— 你不是完美的 ${escapeHtml(primary.cn)}，也不是完美的 ${escapeHtml(secondary.cn)}，你是这两个型的<b>混合体</b>。下面的描述以主匹配为主，你可以顺手看看次匹配那个型你身上有几分。</p>
+      ` : ''}
     </header>
 
     <section class="result-desc">

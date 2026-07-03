@@ -367,6 +367,28 @@ body {
   text-decoration: none;
 }
 
+.result-hybrid-badge {
+  display: inline-block;
+  background: linear-gradient(90deg, #ffd6dc 0%, #ffe8c3 100%);
+  color: var(--accent-hover);
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.result-hybrid-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--accent-bg);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+.result-hybrid-note b {
+  color: var(--accent-hover);
+}
 .result-warning {
   border: 2px dashed var(--accent-soft);
   background: #fff;
