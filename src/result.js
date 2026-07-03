@@ -155,8 +155,13 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
   const canvas = wrap.querySelector('#radar')
   // 重新计算 userLevels（因为 mode 特殊时 primary.pattern 被覆盖了，我们用 rankings[0]）
   // rankings[0] 已经是 best 的 standard type
-  const bestVec = parsePatternToLevels(rankings[0].pattern, dimensions.order)
-  drawRadar(canvas, bestVec, dimensions.order, dimensions.dims)
+  // Show USER's actual L/M/H per dim, not the type's pattern.
+  // Fallback to type pattern only if userLevels wasn't provided.
+  const radarVec =
+    userLevels && Object.keys(userLevels).length > 0
+      ? userLevels
+      : parsePatternToLevels(rankings[0].pattern, dimensions.order)
+  drawRadar(canvas, radarVec, dimensions.order, dimensions.dims)
 
   // Copy
   const siteUrl = window.location.origin + window.location.pathname
