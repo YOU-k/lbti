@@ -73,19 +73,21 @@ const adversarialLevels = {
   A1: 'L', A2: 'L',
   E1: 'L', E3: 'H',
   B1: 'H', B2: 'H',
-  C1: 'H', C2: 'L',
-  M1: 'L', M3: 'H',
+  C1: 'M', C2: 'L',
+  M1: 'H', M3: 'H',
 }
 const perDim = {}
 questions.main.forEach((q) => {
   if (!perDim[q.dim]) perDim[q.dim] = []
   perDim[q.dim].push(q.id)
 })
-const levelToVal = { L: 1, M: 3, H: 4 }
+// L → (1,1)=2; M → (2,3)=5; H → (4,4)=8. Thresholds L=[2,4], M=[5,5], H=[6,8].
 const adversarialAnswers = {}
 for (const [dim, level] of Object.entries(adversarialLevels)) {
-  const v = levelToVal[level]
-  for (const qid of perDim[dim]) adversarialAnswers[qid] = v
+  const qids = perDim[dim]
+  if (level === 'L') qids.forEach((q) => (adversarialAnswers[q] = 1))
+  else if (level === 'H') qids.forEach((q) => (adversarialAnswers[q] = 4))
+  else { adversarialAnswers[qids[0]] = 2; adversarialAnswers[qids[1]] = 3 }
 }
 all = run('adversarial (should trigger fallback)', adversarialAnswers, 'fallback') && all
 
