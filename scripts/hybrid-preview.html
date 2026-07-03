@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=414, initial-scale=1.0" />
+    <title>Hybrid preview</title>
+    <link rel="stylesheet" href="../src/style.css" />
+    <style>
+      body { margin: 0; background: var(--bg); }
+      #app { padding: 24px 16px; max-width: 480px; margin: 0 auto; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      import { renderResult } from '../src/result.js'
+
+      const [dimensions, typesData, config] = await Promise.all([
+        fetch('../data/dimensions.json').then((r) => r.json()),
+        fetch('../data/types.json').then((r) => r.json()),
+        fetch('../data/config.json').then((r) => r.json()),
+      ])
+
+      const fearw = typesData.standard.find((t) => t.code === 'FEARW')
+      const xindong = typesData.standard.find((t) => t.code === 'XINDONG')
+
+      // Simulate: user vector distance 6 from both patterns → sim 70%
+      const result = {
+        mode: 'normal',
+        primary: { ...fearw, similarity: 70, exact: 4 },
+        secondary: { ...xindong, similarity: 70, exact: 4 },
+        rankings: [
+          { ...fearw, similarity: 70, distance: 6, exact: 4 },
+          { ...xindong, similarity: 70, distance: 6, exact: 4 },
+          { ...typesData.standard.find((t) => t.code === 'SEAKING'), similarity: 65 },
+          { ...typesData.standard.find((t) => t.code === 'SOLO'), similarity: 60 },
+          { ...typesData.standard.find((t) => t.code === 'GESHI'), similarity: 58 },
+        ],
+      }
+
+      // A user vector sitting between the two patterns
+      const userLevels = {
+        A1: 'L', A2: 'M', E1: 'M', E3: 'M', B1: 'H',
+        B2: 'L', C1: 'L', C2: 'H', M1: 'H', M3: 'M',
+      }
+
+      const wrap = renderResult({
+        result,
+        dimensions,
+        config,
+        standardTypes: typesData.standard,
+        userLevels,
+        onRestart: () => {},
+      })
+      document.getElementById('app').appendChild(wrap)
+    </script>
+  </body>
+</html>

@@ -28,7 +28,7 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
     primary.similarity - secondary.similarity <= 5 &&
     primary.similarity - secondary.similarity >= 0
   const hybridBadge = isHybrid
-    ? `<div class="result-hybrid-badge">🎭 你在两个型之间 · ${escapeHtml(primary.cn)} × ${escapeHtml(secondary.cn)}</div>`
+    ? `<div class="result-hybrid-badge">你在两个型之间 · ${escapeHtml(primary.cn)} × ${escapeHtml(secondary.cn)}</div>`
     : ''
 
   const codeMap = Object.fromEntries(standardTypes.map((t) => [t.code, t]))
