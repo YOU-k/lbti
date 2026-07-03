@@ -21,12 +21,13 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
     ? '（薛定谔的暧昧兜底）'
     : ''
 
-  // Detect hybrid: top-1 and top-2 within 5% → user sits between two types
+  // Detect hybrid: top-1 and top-2 tied on similarity (0% gap).
+  // Since sim is always a multiple of 5% (dist is integer, sim = 100 - 5×dist),
+  // gap=0 is a true tie — much rarer than gap≤5 which caught every 1-dist diff.
   const isHybrid =
     mode === 'normal' &&
     secondary &&
-    primary.similarity - secondary.similarity <= 5 &&
-    primary.similarity - secondary.similarity >= 0
+    primary.similarity === secondary.similarity
   const hybridBadge = isHybrid
     ? `<div class="result-hybrid-badge">你在两个型之间 · ${escapeHtml(primary.cn)} × ${escapeHtml(secondary.cn)}</div>`
     : ''

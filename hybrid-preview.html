@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=414, initial-scale=1.0" />
     <title>Hybrid preview</title>
-    <link rel="stylesheet" href="../src/style.css" />
+    <link rel="stylesheet" href="./src/style.css" />
     <style>
       body { margin: 0; background: var(--bg); }
       #app { padding: 24px 16px; max-width: 480px; margin: 0 auto; }
@@ -13,12 +13,12 @@
   <body>
     <div id="app"></div>
     <script type="module">
-      import { renderResult } from '../src/result.js'
+      import { renderResult } from './src/result.js'
 
       const [dimensions, typesData, config] = await Promise.all([
-        fetch('../data/dimensions.json').then((r) => r.json()),
-        fetch('../data/types.json').then((r) => r.json()),
-        fetch('../data/config.json').then((r) => r.json()),
+        fetch('./data/dimensions.json').then((r) => r.json()),
+        fetch('./data/types.json').then((r) => r.json()),
+        fetch('./data/config.json').then((r) => r.json()),
       ])
 
       const fearw = typesData.standard.find((t) => t.code === 'FEARW')
