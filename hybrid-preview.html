@@ -15,6 +15,7 @@
     <script type="module">
       import { renderResult } from './src/result.js'
 
+      ;(async () => {
       const [dimensions, typesData, config] = await Promise.all([
         fetch('./data/dimensions.json').then((r) => r.json()),
         fetch('./data/types.json').then((r) => r.json()),
@@ -53,6 +54,7 @@
         onRestart: () => {},
       })
       document.getElementById('app').appendChild(wrap)
+      })()
     </script>
   </body>
 </html>
