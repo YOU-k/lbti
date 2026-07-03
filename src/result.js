@@ -68,6 +68,20 @@ export function renderResult({ result, dimensions, config, standardTypes, userLe
       </section>
     ` : ''}
 
+    ${secondary && mode === 'normal' && secondary.similarity >= 55 ? `
+      <section class="result-secondary">
+        <div class="secondary-label">你身上还有 ${secondary.similarity}% 的这个型</div>
+        <h3 class="secondary-name">${escapeHtml(secondary.cn)}</h3>
+        <p class="secondary-intro">${escapeHtml(secondary.intro)}</p>
+        ${secondary.slogan ? `<blockquote class="secondary-slogan">「${escapeHtml(secondary.slogan)}」</blockquote>` : ''}
+        <details class="secondary-more">
+          <summary>看看这个型完整长啥样</summary>
+          <p class="secondary-desc">${renderDescMarkdown(secondary.desc)}</p>
+          ${secondary.warning ? `<p class="secondary-warning"><b>ta 的一句话警告：</b>${escapeHtml(secondary.warning)}</p>` : ''}
+        </details>
+      </section>
+    ` : ''}
+
     ${whyDims.length > 0 ? `
       <section class="result-why">
         <h3>为什么是这个型？</h3>

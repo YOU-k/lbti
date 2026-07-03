@@ -367,6 +367,59 @@ body {
   text-decoration: none;
 }
 
+.result-secondary {
+  background: linear-gradient(135deg, #fff6ec 0%, #fef4f3 100%);
+  border-left: 3px solid var(--secondary);
+}
+.secondary-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.secondary-name {
+  font-size: 22px;
+  color: var(--accent);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.secondary-intro {
+  font-size: 13px;
+  color: var(--text-soft);
+  font-style: italic;
+  margin-bottom: 10px;
+}
+.secondary-slogan {
+  padding: 8px 12px;
+  border-left: 2px solid var(--accent-soft);
+  background: #fff;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--accent-hover);
+  font-weight: 600;
+  margin: 8px 0;
+}
+.secondary-more summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--accent);
+  padding: 6px 0;
+  user-select: none;
+}
+.secondary-desc {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text);
+  text-indent: 2em;
+  margin-top: 8px;
+}
+.secondary-warning {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
 .result-hybrid-badge {
   display: inline-block;
   background: linear-gradient(90deg, #ffd6dc 0%, #ffe8c3 100%);
